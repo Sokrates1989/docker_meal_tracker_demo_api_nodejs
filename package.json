@@ -1,0 +1,22 @@
+{
+  "name": "docker_meal_tracker_demo_api_nodejs",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "A demo API showcasing backend skills with NodeJS, Express and PostgreSQL for meal tracking. Features user authentication, meal management (add, edit, delete), and containerized deployment via Docker. Supports both local development and production environments. Not intended for real-world use.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "docker_meal_tracker_demo_api_nodejs": "file:",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
