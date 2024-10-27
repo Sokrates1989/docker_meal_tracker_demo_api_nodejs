@@ -5,7 +5,7 @@ import pg from "pg";
 import { config } from "./config.js";
 
 // DB Repo imports.
-import MealTypeRepo from "./db-repos/MealTypeRepo.js";
+import MealTypeRepo from "./db-repos/mealTypeRepo.js";
 
 class DatabaseWrapper {
     constructor() {
