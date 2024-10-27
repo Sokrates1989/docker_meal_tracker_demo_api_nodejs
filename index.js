@@ -1,10 +1,10 @@
 // Global/ public imports.
 import express from "express";
 import bodyParser from "body-parser";
-import pg from "pg";
 
 // Own module imports.
 import { config } from "./src/config.js";
+import databaseWrapper from "./src/DatabaseWrapper.js";
 
 // Base var initialzitions.
 const app = express();
@@ -15,15 +15,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-// DB Connection.
-const db = new pg.Client({
-    user: config.db_user,
-    host: config.db_host,
-    database: config.db_database,
-    password: config.db_password,
-    port: config.db_port,
-});
-db.connect();
 
   
 // Endpoints.
@@ -52,26 +43,28 @@ app.post("/v1/getMealTypes", async (req, res) => {
             return;
         }
 
-        // Fetch meal types
-        const result = await db.query("SELECT * FROM meal_types");
-        const mealTypes = result.rows;
-
+        // Access the MealTypeRepo from DatabaseWrapper and fetch meal types.
+        const mealTypes = await databaseWrapper.getMealTypeRepo().getAllMealTypes();
         if (!mealTypes) {
             res.status(500).json({ message: "Error fetching meal types" });
             console.error("/v1/getMealTypes: 500: Error fetching meal types");
             return;
         }
 
-        // Successfully fetched meal types
+        // Respond with the fetched meal types.
         res.status(200).json({ mealTypes });
         console.log("/v1/getMealTypes: 200: Successfully fetched meal types");
-
     } catch (error) {
         res.status(500).json({ message: "Unhandled exception" });
         console.error(`/v1/getMealTypes: 500: Unhandled exception: ${error.message}`);
     }
 });
-  
+
+// Gracefully close the database connection when the server stops.
+process.on("SIGINT", () => {
+    databaseWrapper.close();
+    process.exit(0);
+});
 
 
 // Server init.
