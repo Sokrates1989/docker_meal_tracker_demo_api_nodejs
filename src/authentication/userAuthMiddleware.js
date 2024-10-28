@@ -1,8 +1,9 @@
-// src/userAuthMiddleware.js
 import databaseWrapper from "../databaseWrapper.js";
 
 const userAuthMiddleware = async (req, res, next) => {
-    const { userName, hashedPassword } = req.body;
+    // Check for user credentials directly in the request body or within the "credentials" object
+    const userName = req.body.userName || (req.body.credentials && req.body.credentials.userName);
+    const hashedPassword = req.body.hashedPassword || (req.body.credentials && req.body.credentials.hashedPassword);
 
     // Verify that both userName and hashedPassword are provided.
     if (!userName || !hashedPassword) {

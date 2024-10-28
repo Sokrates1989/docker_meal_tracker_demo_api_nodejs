@@ -7,6 +7,9 @@ import { config } from "./config.js";
 // DB Repo imports.
 import MealTypeRepo from "./db-repos/mealTypeRepo.js";
 import UserRepo from "./db-repos/userRepo.js";
+import DayRepo from "./db-repos/dayRepo.js";
+import MealRepo from "./db-repos/mealRepo.js";
+import DayMealRepo from "./db-repos/dayMealRepo.js";
 
 class DatabaseWrapper {
     constructor() {
@@ -27,9 +30,23 @@ class DatabaseWrapper {
     getMealTypeRepo() {
         return new MealTypeRepo(this.db);
     }
+
     getUserRepo() {
         return new UserRepo(this.db);
     }
+
+    getDayRepo() {
+        return new DayRepo(this.db);
+    }
+
+    getMealRepo() {
+        return new MealRepo(this.db);
+    }
+
+    getDayMealRepo() {
+        return new DayMealRepo(this.db);
+    }
+
 
     // Close the database connection
     close() {

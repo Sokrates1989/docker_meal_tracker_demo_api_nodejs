@@ -1,7 +1,7 @@
 import { config } from "../config.js";
 
 const tokenMiddleware = (req, res, next) => {
-    const { token } = req.body;
+    const token = req.body.token || (req.body.credentials && req.body.credentials.token);
 
     if (token !== config.authentication_token) {
         res.status(401).json({ message: "Invalid token" });
