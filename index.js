@@ -7,6 +7,8 @@ import { config } from "./src/config.js";
 import databaseWrapper from "./src/databaseWrapper.js";
 import mealRoutes from "./src/api-routes/mealRoutes.js";
 import userRoutes from "./src/api-routes/userRoutes.js";
+import tokenMiddleware from "./src/authentication/tokenMiddleware.js"; // Token verification middleware.
+import userAuthMiddleware from "./src/authentication/userAuthMiddleware.js"; // User authentication middleware.
 
 // Base var initialzitions.
 const app = express();
@@ -18,8 +20,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 // Endpoints from routes.
-app.use("/v1", mealRoutes); 
-app.use("/v1", userRoutes);
+app.use("/v1/auth", tokenMiddleware, userAuthMiddleware, mealRoutes); 
+app.use("/v1", tokenMiddleware, userRoutes);
 
   
 // Endpoints.

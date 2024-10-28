@@ -6,6 +6,7 @@ import { config } from "./config.js";
 
 // DB Repo imports.
 import MealTypeRepo from "./db-repos/mealTypeRepo.js";
+import UserRepo from "./db-repos/userRepo.js";
 
 class DatabaseWrapper {
     constructor() {
@@ -22,9 +23,12 @@ class DatabaseWrapper {
             .catch((error) => console.error("Database connection error:", error));
     }
 
-    // Initialize and return an instance of the MealTypeRepo
+    // Get Repos.
     getMealTypeRepo() {
         return new MealTypeRepo(this.db);
+    }
+    getUserRepo() {
+        return new UserRepo(this.db);
     }
 
     // Close the database connection
