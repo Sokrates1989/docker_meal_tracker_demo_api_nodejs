@@ -30,3 +30,9 @@ Thumbs.db
 coverage/
 .idea/
 .vscode/
+
+
+# Ignore content of db_data.
+db_data/*
+# but keep folder structure itself, by keeping only the .gitkeep file within.
+!db_data/.gitkeep
