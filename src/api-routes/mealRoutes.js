@@ -1,3 +1,9 @@
+// Copyright (C) 2024 Patrick Michiels
+// All rights reserved.
+// This source code is licensed under the Evaluation License Agreement and
+// may not be used, modified, or distributed without explicit permission from the author.
+// This code is provided for evaluation purposes only.
+
 import express from "express";
 import databaseWrapper from "../databaseWrapper.js";
 
@@ -10,17 +16,19 @@ const mealRepo = databaseWrapper.getMealRepo();
 const mealTypeRepo = databaseWrapper.getMealTypeRepo();
 const dayMealRepo = databaseWrapper.getDayMealRepo();
 
-// Endpoint to get meal types.
+/**
+ * @route POST /getMealTypes
+ * @description Endpoint to retrieve all meal types.
+ * @returns {Array} List of meal types.
+ */
 router.post("/getMealTypes", async (req, res) => {
     try {
-
         const mealTypes = await mealTypeRepo.getAllMealTypes();
         if (!mealTypes) {
             res.status(500).json({ message: "Error fetching meal types" });
             console.error("/getMealTypes: 500: Error fetching meal types");
             return;
         }
-
         res.status(200).json({ mealTypes });
         console.log("/getMealTypes: 200: Successfully fetched meal types");
     } catch (error) {
@@ -29,38 +37,41 @@ router.post("/getMealTypes", async (req, res) => {
     }
 });
 
-
-// Add Meal Route
+/**
+ * @route POST /addMeal
+ * @description Adds a new meal for a user.
+ * @returns {Object} Message indicating success or failure.
+ */
 router.post('/addMeal', async (req, res) => {
     try {
         const meal = req.body;
 
-        // Fetch or create the user.
+        // Fetch or create the user
         const user = await userRepo.getUserByCredentialsItem(meal.credentials);
         if (!user) {
-            res.status(406).json({ message: 'user does not exist' });
+            res.status(406).json({ message: 'User does not exist' });
             console.warn(`/v1/addMeal: 406: user does not exist: ${JSON.stringify(meal.credentials)}`);
             return;
         }
 
         const userId = user.id;
 
-        // Fetch or create the day.
+        // Fetch or create the day
         let day = await dayRepo.getDayByDate(meal.year, meal.month, meal.day);
         if (!day) {
             day = await dayRepo.createNewDay(meal.year, meal.month, meal.day);
         }
         const dayId = day.id;
 
-        // Get meal type ID.
+        // Get meal type ID
         const mealTypeId = await mealTypeRepo.getMealTypeIDByName(meal.mealType.toLowerCase());
         if (!mealTypeId) {
-            res.status(400).json({ message: 'invalid meal type' });
+            res.status(400).json({ message: 'Invalid meal type' });
             console.warn(`/v1/addMeal: 400: invalid meal type: ${meal.mealType}`);
             return;
         }
 
-        // Create new meal entry.
+        // Create new meal entry
         const newMeal = await mealRepo.createNewMeal(meal.fat_level, meal.sugar_level);
         if (!newMeal) {
             res.status(400).json({ message: 'Meal already exists. To edit meal use /v1/editMeal' });
@@ -69,97 +80,106 @@ router.post('/addMeal', async (req, res) => {
         }
         const mealId = newMeal.id;
 
-        // Insert the new day meal entry.
+        // Insert the new day meal entry
         const dayMeal = await dayMealRepo.createNewDayMeal(userId, dayId, mealTypeId, mealId);
 
-        // Check if the day meal could not be created due to a duplicate entry.
         if (dayMeal === null) {
             res.status(400).json({ message: "Meal already exists. To edit meal use /v1/editMeal" });
             return;
         }
 
-        res.status(200).json({ message: 'successfully added meal' });
-
+        res.status(200).json({ message: 'Successfully added meal' });
     } catch (error) {
         console.error("Error in addMeal route:", error);
-        res.status(500).json({ message: "internal server error" });
+        res.status(500).json({ message: "Internal server error" });
     }
 });
 
-
-// Edit Meal Route
+/**
+ * @route POST /editMeal
+ * @description Edits an existing meal for a user on a specified day.
+ * @returns {Object} Message indicating success or failure.
+ */
 router.post('/editMeal', async (req, res) => {
     const meal = req.body;
 
     const user = await userRepo.getUserByCredentialsItem(meal.credentials);
     if (!user) {
-        res.status(406).json({ message: 'user does not exist' });
+        res.status(406).json({ message: 'User does not exist' });
         return;
     }
 
     const userId = user.id;
     const day = await dayRepo.getDayByDate(meal.year, meal.month, meal.day);
     if (!day) {
-        res.status(404).json({ message: 'day not found' });
+        res.status(404).json({ message: 'Day not found' });
         return;
     }
 
     const mealTypeId = await mealTypeRepo.getMealTypeIDByName(meal.mealType.toLowerCase());
     if (!mealTypeId) {
-        res.status(400).json({ message: 'invalid meal type' });
+        res.status(400).json({ message: 'Invalid meal type' });
         return;
     }
 
     const existingDayMeal = await dayMealRepo.getDayMeal(userId, day.id, mealTypeId);
     if (!existingDayMeal) {
-        res.status(404).json({ message: 'meal not found for the specified day' });
+        res.status(404).json({ message: 'Meal not found for the specified day' });
         return;
     }
 
     const updateResult = await mealRepo.updateMeal(existingDayMeal.fk_meal_id, meal.fat_level, meal.sugar_level);
-    res.status(updateResult ? 200 : 500).json({ message: updateResult ? 'successfully edited meal' : 'failed to update meal' });
+    res.status(updateResult ? 200 : 500).json({ message: updateResult ? 'Successfully edited meal' : 'Failed to update meal' });
 });
 
-// Delete Meal Route
+/**
+ * @route POST /deleteMeal
+ * @description Deletes an existing meal for a user on a specified day.
+ * @returns {Object} Message indicating success or failure.
+ */
 router.post('/deleteMeal', async (req, res) => {
     const deleteMeal = req.body;
 
     const user = await userRepo.getUserByCredentialsItem(deleteMeal.credentials);
     if (!user) {
-        res.status(406).json({ message: 'user does not exist' });
+        res.status(406).json({ message: 'User does not exist' });
         return;
     }
 
     const userId = user.id;
     const day = await dayRepo.getDayByDate(deleteMeal.year, deleteMeal.month, deleteMeal.day);
     if (!day) {
-        res.status(404).json({ message: 'day not found' });
+        res.status(404).json({ message: 'Day not found' });
         return;
     }
 
     const mealTypeId = await mealTypeRepo.getMealTypeIDByName(deleteMeal.mealType.toLowerCase());
     if (!mealTypeId) {
-        res.status(400).json({ message: 'invalid meal type' });
+        res.status(400).json({ message: 'Invalid meal type' });
         return;
     }
 
     const existingDayMeal = await dayMealRepo.getDayMeal(userId, day.id, mealTypeId);
     if (!existingDayMeal) {
-        res.status(404).json({ message: 'meal not found for the specified day' });
+        res.status(404).json({ message: 'Meal not found for the specified day' });
         return;
     }
 
-    const deleteResult = await mealRepo.deleteMeal(userId, day.id, mealTypeId, existingDayMeal.fk_meal_id);
-    res.status(deleteResult ? 200 : 404).json({ message: deleteResult ? 'successfully deleted meal' : 'meal or day_meal entry not found' });
+    const deleteResult = await mealRepo.deleteMeal(existingDayMeal.fk_meal_id);
+    res.status(deleteResult ? 200 : 404).json({ message: deleteResult ? 'Successfully deleted meal' : 'Meal or day_meal entry not found' });
 });
 
-// Get Meals Route
+/**
+ * @route POST /getMeals
+ * @description Retrieves meals for a user on a specified day.
+ * @returns {Array} List of meals for the specified day.
+ */
 router.post('/getMeals', async (req, res) => {
     const getMeals = req.body;
 
     const user = await userRepo.getUserByCredentialsItem(getMeals.credentials);
     if (!user) {
-        res.status(406).json({ message: 'user does not exist' });
+        res.status(406).json({ message: 'User does not exist' });
         return;
     }
 

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/authentication/userAuthMiddleware.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/authentication/userAuthMiddleware.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// Copyright (C) 2024 Patrick Michiels
+// All rights reserved.
+// This source code is licensed under the Evaluation License Agreement and
+// may not be used, modified, or distributed without explicit permission from the author.
+// This code is provided for evaluation purposes only.
+
+import databaseWrapper from "../databaseWrapper.js";
+
+/**
+ * @function userAuthMiddleware
+ * @description Middleware for user authentication. Verifies the user's credentials by checking the username and hashed password.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Callback to pass control to the next middleware or route handler.
+ * @returns {void} Responds with 400 if credentials are missing, 401 if invalid, or 406 if the user does not exist; otherwise, proceeds to the next middleware.
+ */
+const userAuthMiddleware = async (req, res, next) => {
+    // Check for user credentials directly in the request body or within the "credentials" object
+    const userName = req.body.userName || (req.body.credentials &amp;&amp; req.body.credentials.userName);
+    const hashedPassword = req.body.hashedPassword || (req.body.credentials &amp;&amp; req.body.credentials.hashedPassword);
+
+    // Verify that both userName and hashedPassword are provided
+    if (!userName || !hashedPassword) {
+        res.status(400).json({ message: "Username and password are required" });
+        console.warn("Invalid request: Missing username or password");
+        return;
+    }
+
+    // Check if the user's password is correct
+    const isPasswordCorrect = await databaseWrapper.getUserRepo().isUserPasswordCorrect({ userName, hashedPassword });
+    if (!isPasswordCorrect) {
+        res.status(401).json({ message: "Invalid credentials" });
+        console.warn("Unauthorized access attempt with invalid credentials");
+        return;
+    }
+
+    // Check if the user exists in the database
+    const user = await databaseWrapper.getUserRepo().getUserByCredentialsItem({ userName, hashedPassword });
+    if (!user) {
+        res.status(406).json({ message: "User does not exist" });
+        console.warn("User does not exist in the database");
+        return;
+    }
+
+    // Attach user information to the request object for further processing in routes
+    req.user = user;
+
+    // Proceed to the next middleware or route handler
+    next();
+};
+
+export default userAuthMiddleware;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DatabaseWrapper.html">DatabaseWrapper</a></li><li><a href="DayMealRepo.html">DayMealRepo</a></li><li><a href="DayRepo.html">DayRepo</a></li><li><a href="MealRepo.html">MealRepo</a></li><li><a href="MealTypeRepo.html">MealTypeRepo</a></li><li><a href="UserRepo.html">UserRepo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#close">close</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#createNewDayMeal">createNewDayMeal</a></li><li><a href="global.html#createNewMeal">createNewMeal</a></li><li><a href="global.html#createNewUser_fromCredentialsItem">createNewUser_fromCredentialsItem</a></li><li><a href="global.html#deleteMeal">deleteMeal</a></li><li><a href="global.html#getAllMealTypes">getAllMealTypes</a></li><li><a href="global.html#getDayMeal">getDayMeal</a></li><li><a href="global.html#getDayMealRepo">getDayMealRepo</a></li><li><a href="global.html#getDayMealsByUserIDAndDayID">getDayMealsByUserIDAndDayID</a></li><li><a href="global.html#getDayRepo">getDayRepo</a></li><li><a href="global.html#getMealByID">getMealByID</a></li><li><a href="global.html#getMealRepo">getMealRepo</a></li><li><a href="global.html#getMealTypeIDByName">getMealTypeIDByName</a></li><li><a href="global.html#getMealTypeNameByID">getMealTypeNameByID</a></li><li><a href="global.html#getMealTypeRepo">getMealTypeRepo</a></li><li><a href="global.html#getUserByCredentialsItem">getUserByCredentialsItem</a></li><li><a href="global.html#getUserRepo">getUserRepo</a></li><li><a href="global.html#isUserPasswordCorrect">isUserPasswordCorrect</a></li><li><a href="global.html#tokenMiddleware">tokenMiddleware</a></li><li><a href="global.html#updateMeal">updateMeal</a></li><li><a href="global.html#userAuthMiddleware">userAuthMiddleware</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue Oct 29 2024 11:26:59 GMT+0100 (Mitteleuropäische Normalzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

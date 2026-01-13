@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/db-repos/mealTypeRepo.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/db-repos/mealTypeRepo.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// Copyright (C) 2024 Patrick Michiels
+// All rights reserved.
+// This source code is licensed under the Evaluation License Agreement and
+// may not be used, modified, or distributed without explicit permission from the author.
+// This code is provided for evaluation purposes only.
+
+/**
+ * @class MealTypeRepo
+ * @description Repository class for handling meal type-related database operations.
+ */
+class MealTypeRepo {
+    /**
+     * @constructor
+     * @param {Object} db - Database client instance for executing queries.
+     */
+    constructor(db) {
+        this.db = db;
+    }
+
+    /**
+     * @method getAllMealTypes
+     * @description Retrieves all meal types from the database.
+     * @returns {Array} Array of all meal type records.
+     * @throws Throws an error if the query fails.
+     */
+    async getAllMealTypes() {
+        try {
+            const result = await this.db.query("SELECT * FROM meal_types");
+            return result.rows;
+        } catch (error) {
+            console.error("Error fetching meal types:", error);
+            throw error;
+        }
+    }
+
+    /**
+     * @method getMealTypeIDByName
+     * @description Retrieves the ID of a meal type based on its name.
+     * @param {string} mealTypeName - The name of the meal type.
+     * @returns {number|null} The ID of the meal type if found, or null if not found.
+     * @throws Throws an error if the query fails.
+     */
+    async getMealTypeIDByName(mealTypeName) {
+        try {
+            const query = "SELECT ID FROM meal_types WHERE name = $1";
+            const result = await this.db.query(query, [mealTypeName]);
+
+            // Return the ID if found, otherwise null
+            return result.rows.length > 0 ? result.rows[0].id : null;
+        } catch (error) {
+            console.error(`Error fetching meal type ID for ${mealTypeName}:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * @method getMealTypeNameByID
+     * @description Retrieves the name of a meal type based on its ID.
+     * @param {number} mealTypeID - The ID of the meal type.
+     * @returns {string|null} The name of the meal type if found, or null if not found.
+     * @throws Throws an error if the query fails.
+     */
+    async getMealTypeNameByID(mealTypeID) {
+        try {
+            const query = "SELECT name FROM meal_types WHERE ID = $1";
+            const result = await this.db.query(query, [mealTypeID]);
+
+            // Return the name if found, otherwise null
+            return result.rows.length > 0 ? result.rows[0].name : null;
+        } catch (error) {
+            console.error(`Error fetching meal type name for ID ${mealTypeID}:`, error);
+            throw error;
+        }
+    }
+}
+
+export default MealTypeRepo;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DatabaseWrapper.html">DatabaseWrapper</a></li><li><a href="DayMealRepo.html">DayMealRepo</a></li><li><a href="DayRepo.html">DayRepo</a></li><li><a href="MealRepo.html">MealRepo</a></li><li><a href="MealTypeRepo.html">MealTypeRepo</a></li><li><a href="UserRepo.html">UserRepo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#close">close</a></li><li><a href="global.html#config">config</a></li><li><a href="global.html#createNewDayMeal">createNewDayMeal</a></li><li><a href="global.html#createNewMeal">createNewMeal</a></li><li><a href="global.html#createNewUser_fromCredentialsItem">createNewUser_fromCredentialsItem</a></li><li><a href="global.html#deleteMeal">deleteMeal</a></li><li><a href="global.html#getAllMealTypes">getAllMealTypes</a></li><li><a href="global.html#getDayMeal">getDayMeal</a></li><li><a href="global.html#getDayMealRepo">getDayMealRepo</a></li><li><a href="global.html#getDayMealsByUserIDAndDayID">getDayMealsByUserIDAndDayID</a></li><li><a href="global.html#getDayRepo">getDayRepo</a></li><li><a href="global.html#getMealByID">getMealByID</a></li><li><a href="global.html#getMealRepo">getMealRepo</a></li><li><a href="global.html#getMealTypeIDByName">getMealTypeIDByName</a></li><li><a href="global.html#getMealTypeNameByID">getMealTypeNameByID</a></li><li><a href="global.html#getMealTypeRepo">getMealTypeRepo</a></li><li><a href="global.html#getUserByCredentialsItem">getUserByCredentialsItem</a></li><li><a href="global.html#getUserRepo">getUserRepo</a></li><li><a href="global.html#isUserPasswordCorrect">isUserPasswordCorrect</a></li><li><a href="global.html#tokenMiddleware">tokenMiddleware</a></li><li><a href="global.html#updateMeal">updateMeal</a></li><li><a href="global.html#userAuthMiddleware">userAuthMiddleware</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue Oct 29 2024 11:26:59 GMT+0100 (Mitteleuropäische Normalzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
